@@ -1,0 +1,62 @@
+
+- name: "HTH | Tmux | Set root config path"
+  ansible.builtin.set_fact:
+    tmux_user_config_dir_path: "/home/{{ config.user }}/{{ tmux_default_user_config_path }}"
+
+- name: "HTH | Tmux | Manage root directory"
+  ansible.builtin.file:
+    path: "{{ tmux_user_config_dir_path }}"
+    state: "{{ 'directory' if (config.remove is undefined or not config.remove) else 'absent' }}"
+    owner: "{{ config.user }}"
+    group: "{{ config.user }}"
+    mode: 0744
+    force: no
+
+- name: "HTH | Tmux | Set user config file path"
+  ansible.builtin.set_fact:
+    tmux_user_config_file_path: "{{ tmux_user_config_dir_path }}/tmux.conf"
+
+- name: "HTH | Tmux | Copy config file"
+  ansible.builtin.copy:
+    src: "{{ config.file }}"
+    dest: "{{ tmux_user_config_file_path }}"
+    owner: "{{ config.user }}"
+    group: "{{ config.user }}"
+    mode: 0644
+  when:
+    - tmux.remove is undefined or not tmux.remove
+    - config.remove is undefined or not config.remove
+
+- name: "HTH | Tmux | Remove config file"
+  ansible.builtin.file:
+    path: "{{ tmux_user_config_file_path }}"
+    state: absent
+  when:
+    - config.remove is defined
+    - config.remove
+
+- name: "HTH | Tmux | Set user plugins path"
+  ansible.builtin.set_fact:
+    tmux_user_plugins_path: "{{ tmux_user_config_dir_path }}/plugins"
+  when:
+    - config.plugins is defined
+
+- name: "HTH | Tmux | Manage plugins directory"
+  ansible.builtin.file:
+    path: "{{ tmux_user_plugins_path }}"
+    state: "{{ 'directory' if (config.plugins.remove is undefined or not config.plugins.remove) else 'absent' }}"
+    owner: "{{ config.user }}"
+    group: "{{ config.user }}"
+    mode: 0744
+    force: no
+  when:
+    - config.plugins is defined
+
+- name: "HTH | Tmux | Checkout tmux package manager"
+  ansible.builtin.git:
+    repo: 'https://github.com/tmux-plugins/tpm.git'
+    dest: "{{ tmux_user_plugins_path }}/tpm"
+    version: "{{ 'HEAD' if (config.plugins.version is undefined) else config.plugins.version }}"
+  when:
+    - config.plugins is defined
+    - config.plugins.remove is undefined or not config.plugins.remove

@@ -1,0 +1,21 @@
+- name: "HTH | Tmux | Assert input variables"
+  ansible.utils.validate:
+    data: "{{ tmux }}"
+    criteria: "{{ lookup('file', 'assertions/criteria/tmux.json') | from_json }}"
+    engine: ansible.utils.jsonschema
+  run_once: yes
+  delegate_to: localhost
+
+- name: "HTH | Tmux | Manage package"
+  ansible.builtin.apt:
+    name: tmux
+    state: "{{ 'latest' if (tmux.remove is undefined or not tmux.remove) else 'absent' }}"
+
+- name: "HTH | Tmux | Config per user"
+  ansible.builtin.include_tasks: config.yml
+  loop: "{{ tmux.config }}"
+  loop_control:
+    loop_var: config
+  when:
+    - tmux is defined
+    - tmux.config is defined

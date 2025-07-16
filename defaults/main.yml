@@ -1,0 +1,5 @@
+# Contains default values used in the role
+
+# The default path to where tmux configuration will be placed.
+# It will always be relative to the user's home directory.
+tmux_default_user_config_path: .config/tmux
