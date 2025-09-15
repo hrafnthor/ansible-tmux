@@ -52,6 +52,16 @@
   when:
     - config.plugins is defined
 
+- name: "HTH | Tmux | Detect TPM local changes"
+  ansible.builtin.command: "git -C {{ tmux_user_plugins_path }} diff --quiet || echo 'changed'"
+  register: tpm_changed
+  changed_when: false
+  failed_when: false    # Don't fail the task when rc != 0 (i.e no repo or it differs)
+  no_log: true          # Exclude git error output from being logged
+  when:
+  - config.plugins is defined
+  - config.plugins.remove is undefined or not config.plugins.remove
+
 - name: "HTH | Tmux | Checkout tmux package manager"
   become_user: "{{ config.user }}"
   ansible.builtin.git:
@@ -61,3 +71,4 @@
   when:
     - config.plugins is defined
     - config.plugins.remove is undefined or not config.plugins.remove
+    - tpm_changed.stdout != 'changed'
