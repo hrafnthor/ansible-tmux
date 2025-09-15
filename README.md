@@ -4,15 +4,17 @@ This role installs and copies over user specific configuration files for the ter
 
 ## Requirements
 
-This role requires two separate tools be installed.
+This role requires three separate tools be installed.
 
-First it requires the `ansible.utils` collection be installed from Ansible-Galaxy via:
+First it requires `git` to be installed and on the path.
+
+Second it requires the `ansible.utils` collection be installed from Ansible-Galaxy via:
 
 ```bash
 ansible-galaxy collection install ansible.utils
 ```
 
-Secondly it requires the `jsonschema` Python package be installed.
+Third it requires the `jsonschema` Python package be installed.
 
 This can be done via `pip`:
 
