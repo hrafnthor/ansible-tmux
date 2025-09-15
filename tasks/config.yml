@@ -52,12 +52,18 @@
   when:
     - config.plugins is defined
 
+- name: "HTH | Tmux | Set tpm path"
+  ansible.builtin.set_fact:
+    tmux_tpm_path: "{{ tmux_user_plugins_path }}/tpm"
+  when:
+    - config.plugins is defined
+
 - name: "HTH | Tmux | Detect TPM local changes"
-  ansible.builtin.command: "git -C {{ tmux_user_plugins_path }} diff --quiet || echo 'changed'"
+  ansible.builtin.shell:
+    cmd: "git -C {{ tmux_tpm_path }} diff --quiet >/dev/null 2>&1 || echo 'changed'"
   register: tpm_changed
   changed_when: false
   failed_when: false    # Don't fail the task when rc != 0 (i.e no repo or it differs)
-  no_log: true          # Exclude git error output from being logged
   when:
   - config.plugins is defined
   - config.plugins.remove is undefined or not config.plugins.remove
@@ -66,7 +72,7 @@
   become_user: "{{ config.user }}"
   ansible.builtin.git:
     repo: 'https://github.com/tmux-plugins/tpm.git'
-    dest: "{{ tmux_user_plugins_path }}/tpm"
+    dest: "{{ tmux_tpm_path }}"
     version: "{{ 'HEAD' if (config.plugins.version is undefined) else config.plugins.version }}"
   when:
     - config.plugins is defined
