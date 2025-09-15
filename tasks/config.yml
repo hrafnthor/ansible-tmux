@@ -53,6 +53,7 @@
     - config.plugins is defined
 
 - name: "HTH | Tmux | Checkout tmux package manager"
+  become_user: "{{ config.user }}"
   ansible.builtin.git:
     repo: 'https://github.com/tmux-plugins/tpm.git'
     dest: "{{ tmux_user_plugins_path }}/tpm"
